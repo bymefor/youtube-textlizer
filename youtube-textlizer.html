@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>YouTube Textlizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#f8f8f6;--sf:#fff;--sf2:#f1f1ed;--bd:#e4e4de;--tx:#111110;--tx2:#68685f;--tx3:#a5a59c;--red:#cc2e2e;--green:#1a7a40;--sh:0 1px 3px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04);--r:14px;--rs:9px}
+[dark]{--bg:#0c0c0b;--sf:#161615;--sf2:#1f1f1e;--bd:#2b2b29;--tx:#eeeee9;--tx2:#848479;--tx3:#52524b;--sh:0 1px 3px rgba(0,0,0,.5),0 4px 16px rgba(0,0,0,.3)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+header{position:sticky;top:0;z-index:300;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--bg);border-bottom:1px solid var(--bd);backdrop-filter:blur(12px);transition:background .25s,border-color .25s}
+.logo{font-family:'Lora',serif;font-size:1.2rem;letter-spacing:-.025em;color:var(--tx);display:flex;align-items:center;gap:9px;user-select:none}
+.pip{width:8px;height:8px;background:var(--red);border-radius:50%}
+.tog{width:42px;height:22px;background:var(--sf2);border:1px solid var(--bd);border-radius:11px;cursor:pointer;position:relative;transition:background .25s,border-color .25s}
+.tog::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:var(--tx);border-radius:50%;transition:transform .22s cubic-bezier(.34,1.56,.64,1),background .25s}
+[dark] .tog::after{transform:translateX(20px)}
+main{max-width:820px;margin:0 auto;padding:0 22px 80px}
+.hero{padding:76px 0 50px;text-align:center;animation:up .5s ease both}
+.badge{display:inline-flex;align-items:center;gap:8px;background:var(--sf);border:1px solid var(--bd);border-radius:100px;padding:5px 16px;font-size:.71rem;font-weight:500;color:var(--tx3);letter-spacing:.05em;margin-bottom:26px}
+.live{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s ease infinite}
+h1{font-family:'Lora',serif;font-size:clamp(2rem,5.5vw,3.6rem);line-height:1.07;letter-spacing:-.035em;color:var(--tx);margin-bottom:16px}
+h1 em{font-style:italic;color:var(--tx2)}
+.sub{font-size:1rem;color:var(--tx2);line-height:1.7;max-width:500px;margin:0 auto 40px}
+.icard{max-width:640px;margin:0 auto;background:var(--sf);border:1.5px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.icard:focus-within{border-color:var(--tx);box-shadow:0 0 0 3px rgba(17,17,16,.07),var(--sh)}
+[dark] .icard:focus-within{box-shadow:0 0 0 3px rgba(238,238,233,.07),var(--sh)}
+.irow{display:flex;align-items:center}
+.iico{padding:0 12px 0 18px;color:var(--tx3);font-size:1rem;flex-shrink:0}
+.ifield{flex:1;background:transparent;border:none;outline:none;padding:16px 0;font-family:'DM Sans',sans-serif;font-size:.93rem;color:var(--tx)}
+.ifield::placeholder{color:var(--tx3)}
+.ibtn{background:var(--tx);color:var(--bg);border:none;padding:0 24px;height:54px;font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;transition:opacity .15s;flex-shrink:0;white-space:nowrap}
+.ibtn:hover{opacity:.82}
+.ibtn:disabled{opacity:.35;cursor:not-allowed}
+#loading{display:none;text-align:center;padding:64px 0;animation:up .4s ease both}
+.spin{width:36px;height:36px;border:2.5px solid var(--bd);border-top-color:var(--tx);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 20px}
+.load-t{font-size:.95rem;font-weight:500;color:var(--tx);margin-bottom:5px}
+.load-s{font-size:.78rem;color:var(--tx3);margin-bottom:16px}
+.load-bar{width:200px;height:2px;background:var(--bd);border-radius:2px;margin:0 auto;overflow:hidden}
+.load-fill{height:100%;background:var(--tx);border-radius:2px;width:0%;transition:width .6s ease}
+#errbox{display:none;margin-top:28px;background:#fef2f2;border:1px solid #fecaca;border-radius:var(--r);padding:18px 22px;animation:up .3s ease both}
+[dark] #errbox{background:#1c0b0b;border-color:#5c1f1f}
+.err-h{font-size:.875rem;font-weight:600;color:var(--red);margin-bottom:5px}
+.err-b{font-size:.83rem;color:var(--tx2);line-height:1.6}
+#results{display:none;margin-top:48px}
+.vcard{display:flex;gap:18px;align-items:flex-start;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:20px;margin-bottom:24px;box-shadow:var(--sh);animation:up .4s ease both}
+.vthumb{width:128px;height:72px;border-radius:7px;object-fit:cover;background:var(--sf2);flex-shrink:0}
+.vinfo{flex:1;min-width:0}
+.vtitle{font-family:'Lora',serif;font-size:1.1rem;line-height:1.32;color:var(--tx);margin-bottom:10px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:.7rem;color:var(--tx3);background:var(--sf2);border:1px solid var(--bd);border-radius:100px;padding:3px 10px}
+.chip.g{color:var(--green);border-color:rgba(26,122,64,.3);background:rgba(26,122,64,.06)}
+.chip.w{color:#b45309;border-color:rgba(180,83,9,.3);background:rgba(180,83,9,.06)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;animation:up .4s ease .05s both}
+.tab{background:var(--sf);border:1.5px solid var(--bd);border-radius:100px;padding:7px 16px;font-family:'DM Sans',sans-serif;font-size:.81rem;font-weight:500;color:var(--tx2);cursor:pointer;transition:all .15s}
+.tab:hover{border-color:var(--tx);color:var(--tx)}
+.tab.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.panel{display:none;animation:up .25s ease both}
+.panel.on{display:block}
+.cc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:14px}
+.cc-h{padding:13px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.cc-lbl{font-size:.69rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);flex-shrink:0}
+.cc-b{padding:22px}
+.cc-acts{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.icn{width:28px;height:28px;background:var(--sf2);border:1px solid var(--bd);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--tx2);transition:all .15s;flex-shrink:0}
+.icn:hover{background:var(--bd);color:var(--tx)}
+.icn.ok{background:#f0fdf5;color:var(--green);border-color:#86efac}
+.abtn{display:inline-flex;align-items:center;gap:5px;background:var(--sf2);border:1.5px solid var(--bd);border-radius:var(--rs);padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:.77rem;font-weight:500;color:var(--tx2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.abtn:hover{border-color:var(--tx);color:var(--tx)}
+.abtn.on{background:var(--green);border-color:var(--green);color:#fff}
+.abtn.dark{background:linear-gradient(135deg,#1a1a2e,#16213e);border-color:transparent;color:#fff;font-weight:600}
+[dark] .abtn.dark{background:linear-gradient(135deg,#e8e8e3,#cfcfc5);color:#111}
+.abtn.dark:hover{opacity:.88}
+.abtn:disabled{opacity:.45;cursor:not-allowed}
+.tlang{font-size:.7rem;color:var(--green);padding:3px 9px;background:rgba(26,122,64,.08);border:1px solid rgba(26,122,64,.2);border-radius:100px;display:none}
+.tlang.on{display:inline}
+.kplist{list-style:none}
+.kplist li{display:flex;align-items:flex-start;gap:11px;padding:10px 0;border-bottom:1px solid var(--bd);font-size:.9rem;line-height:1.62;color:var(--tx)}
+.kplist li:last-child{border-bottom:none;padding-bottom:0}
+.kpdot{width:5px;height:5px;background:var(--tx3);border-radius:50%;flex-shrink:0;margin-top:9px}
+.nb{font-size:.91rem;line-height:1.82;color:var(--tx)}
+.nb h3{font-family:'Lora',serif;font-size:1.07rem;color:var(--tx);margin:22px 0 9px;font-weight:600}
+.nb h3:first-child{margin-top:0}
+.nb p{color:var(--tx2);margin-bottom:14px}
+.nb p:last-child{margin-bottom:0}
+.nb strong{color:var(--tx);font-weight:600}
+.tli{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--bd)}
+.tli:last-child{border-bottom:none}
+.tlts{font-size:.71rem;font-weight:600;color:var(--tx3);background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:3px 9px;flex-shrink:0;white-space:nowrap;margin-top:2px}
+.tltx{font-size:.9rem;line-height:1.6;color:var(--tx)}
+.txb{font-size:.87rem;line-height:1.9;color:var(--tx2);max-height:400px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bd) transparent;white-space:pre-wrap}
+.sumb{font-family:'Lora',serif;font-style:italic;font-size:1.14rem;line-height:1.78;color:var(--tx)}
+.qcard{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:22px;margin-bottom:12px;box-shadow:var(--sh);animation:up .4s ease both}
+.qq{font-size:.93rem;font-weight:500;color:var(--tx);margin-bottom:16px;line-height:1.5}
+.qq .qn{color:var(--tx3);font-size:.77rem;font-weight:400;margin-right:8px}
+.opts{display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;align-items:center;gap:11px;background:var(--sf2);border:1.5px solid var(--bd);border-radius:var(--rs);padding:11px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.875rem;color:var(--tx);text-align:left;transition:all .15s}
+.opt:hover:not(:disabled){border-color:var(--tx)}
+.opt:disabled{cursor:default}
+.opt.correct{background:#f0fdf5;border-color:var(--green);color:#144d29}
+.opt.wrong{background:#fff5f5;border-color:#fca5a5;color:#991b1b}
+[dark] .opt.correct{background:#071c10;border-color:var(--green);color:#6ee7a7}
+[dark] .opt.wrong{background:#1c0707;border-color:#f87171;color:#fca5a5}
+.olbl{width:22px;height:22px;border-radius:50%;background:var(--bd);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;color:var(--tx2)}
+.opt.correct .olbl{background:var(--green);color:#fff}
+.opt.wrong .olbl{background:var(--red);color:#fff}
+.qexp{margin-top:11px;padding:10px 14px;background:var(--sf2);border-radius:var(--rs);font-size:.81rem;color:var(--tx2);line-height:1.6;display:none}
+.qexp.show{display:block;animation:up .2s ease both}
+.sbox{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;box-shadow:var(--sh)}
+.slbl{font-size:.8rem;color:var(--tx2);margin-bottom:4px}
+.sval{font-family:'Lora',serif;font-size:2rem;color:var(--tx)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;backdrop-filter:blur(4px)}
+.overlay.on{display:flex;animation:up .2s ease both}
+.modal{background:var(--sf);border:1px solid var(--bd);border-radius:18px;max-width:780px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,.18);overflow:hidden}
+.mhead{padding:20px 26px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#1a1a2e,#16213e)}
+[dark] .mhead{background:linear-gradient(135deg,#e8e8e3,#d0d0c8)}
+.mtitle{font-family:'Lora',serif;font-size:1.2rem;color:#fff;font-style:italic}
+[dark] .mtitle{color:#111}
+.msub{font-size:.72rem;color:rgba(255,255,255,.55);margin-top:3px}
+[dark] .msub{color:rgba(0,0,0,.45)}
+.mclose{background:rgba(255,255,255,.15);border:none;border-radius:50%;width:30px;height:30px;color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.mclose:hover{background:rgba(255,255,255,.28)}
+[dark] .mclose{color:#111;background:rgba(0,0,0,.1)}
+.mbody{padding:26px;max-height:72vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bd) transparent}
+.mfoot{padding:14px 26px;border-top:1px solid var(--bd);display:flex;gap:8px;flex-wrap:wrap}
+.sn-loading{text-align:center;padding:48px 0;color:var(--tx3);font-size:.9rem}
+.sn-spin{width:30px;height:30px;border:2.5px solid var(--bd);border-top-color:var(--tx);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px}
+.sn .sn-h1{font-family:'Lora',serif;font-size:1.4rem;color:var(--tx);margin-bottom:4px;font-weight:600}
+.sn .sn-meta{font-size:.74rem;color:var(--tx3);margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid var(--bd)}
+.sn .sn-sec{margin-bottom:22px}
+.sn .sn-sec h2{font-family:'Lora',serif;font-size:1rem;color:var(--tx);margin-bottom:10px;padding-bottom:6px;border-bottom:1.5px solid var(--bd);font-weight:600}
+.sn ul{list-style:none;margin:0}
+.sn ul li{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd);font-size:.88rem;line-height:1.62;color:var(--tx2)}
+.sn ul li:last-child{border-bottom:none}
+.sn ul li::before{content:"▸";color:var(--tx3);flex-shrink:0;font-size:.8rem;margin-top:2px}
+.sndef{background:var(--sf2);border-left:3px solid var(--tx);border-radius:0 var(--rs) var(--rs) 0;padding:9px 14px;margin:8px 0;font-size:.86rem;line-height:1.6;color:var(--tx2)}
+.sndef strong{color:var(--tx);display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.snnote{background:rgba(26,122,64,.07);border:1px solid rgba(26,122,64,.2);border-radius:var(--rs);padding:9px 14px;font-size:.84rem;color:var(--tx2);margin:8px 0}
+[dark] .snnote{background:rgba(26,122,64,.1)}
+.sn-para{font-size:.91rem;line-height:1.78;color:var(--tx2);margin-bottom:14px;margin-top:4px}
+.sn-point{margin-bottom:14px;padding:14px 16px;background:var(--sf2);border-radius:var(--rs);border-left:3px solid var(--bd)}
+.sn-point-title{font-size:.9rem;font-weight:600;color:var(--tx);margin-bottom:7px;line-height:1.4}
+.sn-point-detail{font-size:.87rem;line-height:1.75;color:var(--tx2)}
+.sn-point-detail p{margin-bottom:6px}
+.brow{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px;padding-top:22px;border-top:1px solid var(--bd)}
+.bac{background:var(--sf);border:1.5px solid var(--bd);border-radius:var(--rs);padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:500;color:var(--tx);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:7px}
+.bac:hover{border-color:var(--tx)}
+.hist{margin-top:60px;padding-top:38px;border-top:1px solid var(--bd)}
+.sec-lbl{font-size:.69rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px}
+.hlist{display:flex;flex-direction:column;gap:6px}
+.hi{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 15px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s}
+.hi:hover{border-color:var(--tx)}
+.hi-thumb{width:50px;height:28px;border-radius:4px;object-fit:cover;background:var(--sf2);flex-shrink:0}
+.hi-title{font-size:.86rem;color:var(--tx);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hi-date{font-size:.72rem;color:var(--tx3);flex-shrink:0}
+.hi-del{background:none;border:none;cursor:pointer;color:var(--tx3);font-size:.84rem;padding:2px 7px;border-radius:4px;transition:all .15s}
+.hi-del:hover{background:var(--sf2);color:var(--red)}
+footer{text-align:center;padding:44px 24px 32px;border-top:1px solid var(--bd);margin-top:40px}
+.fi{display:inline-flex;align-items:center;gap:10px}
+.ft{font-family:'DM Sans',sans-serif;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);font-weight:500}
+.fh{color:#e05555;font-size:1.2rem;animation:heartbeat 1.4s ease infinite}
+.fn{font-family:'Lora',serif;font-style:italic;font-size:1.2rem;background:linear-gradient(135deg,#c0392b,#e74c3c,#e67e22);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:600}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--tx);color:var(--bg);padding:11px 20px;border-radius:var(--rs);font-size:.875rem;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:999;animation:tin .3s ease both}
+.toast.out{animation:tout .3s ease both}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes heartbeat{0%,100%{transform:scale(1)}14%{transform:scale(1.3)}28%{transform:scale(1)}42%{transform:scale(1.2)}70%{transform:scale(1)}}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tout{from{opacity:1}to{opacity:0;transform:translateY(8px)}}
+@media(max-width:600px){
+  header{padding:0 16px}main{padding:0 14px 80px}.hero{padding:52px 0 38px}h1{font-size:2rem}
+  .vcard{flex-direction:column}.vthumb{width:100%;height:auto;aspect-ratio:16/9}
+  .brow,.mfoot{flex-direction:column}.bac{justify-content:center}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="pip"></div>YouTube Textlizer</div>
+  <button class="tog" onclick="toggleDark()" title="Toggle dark mode"></button>
+</header>
+<main>
+  <section class="hero">
+    <div class="badge"><div class="live"></div>⚡ Groq AI — Ultra Fast</div>
+    <h1>Turn YouTube Videos<br/>into <em>Smart Text</em></h1>
+    <p class="sub">Paste any YouTube link and instantly get structured notes, timelines, summaries, quizzes and study notes.</p>
+    <div class="icard">
+      <div class="irow">
+        <span class="iico">▶</span>
+        <input class="ifield" id="urlInput" type="url" placeholder="Paste YouTube URL here..." autocomplete="off" onkeydown="if(event.key==='Enter')analyze()"/>
+        <button class="ibtn" id="goBtn" onclick="analyze()">Analyze →</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="loading">
+    <div class="spin"></div>
+    <p class="load-t" id="loadT">Analyzing video...</p>
+    <p class="load-s" id="loadS">Fetching transcript</p>
+    <div class="load-bar"><div class="load-fill" id="loadFill"></div></div>
+  </div>
+
+  <div id="errbox">
+    <div class="err-h" id="errH">Error</div>
+    <div class="err-b" id="errB"></div>
+  </div>
+
+  <div id="results">
+    <div class="vcard">
+      <img class="vthumb" id="vThumb" src="" alt=""/>
+      <div class="vinfo">
+        <div class="vtitle" id="vTitle">—</div>
+        <div class="chips">
+          <span class="chip" id="vChan">—</span>
+          <span class="chip" id="vDur">—</span>
+          <span class="chip g" id="vReal" style="display:none">✓ Real Transcript</span>
+          <span class="chip w" id="vEst" style="display:none">⚠ AI Estimated</span>
+          <span class="chip g">⚡ Groq AI</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab on" onclick="showTab('notes',this)">📝 Notes</button>
+      <button class="tab" onclick="showTab('kp',this)">✦ Key Points</button>
+      <button class="tab" onclick="showTab('tl',this)">🕐 Timeline</button>
+      <button class="tab" onclick="showTab('tx',this)">📄 Transcript</button>
+      <button class="tab" onclick="doSum(this)">⚡ Summary</button>
+      <button class="tab" onclick="doQuiz(this)">🧠 Quiz</button>
+    </div>
+
+    <div class="panel on" id="panel-notes">
+      <div class="cc"><div class="cc-h"><div class="cc-lbl">📝 Detailed Notes</div><div class="cc-acts"><button class="icn" onclick="cp('notesEl')" title="Copy">⎘</button></div></div><div class="cc-b"><div class="nb" id="notesEl"></div></div></div>
+    </div>
+    <div class="panel" id="panel-kp">
+      <div class="cc"><div class="cc-h"><div class="cc-lbl">✦ Key Points</div><div class="cc-acts"><button class="icn" onclick="cp('kpEl')" title="Copy">⎘</button></div></div><div class="cc-b"><ul class="kplist" id="kpEl"></ul></div></div>
+    </div>
+    <div class="panel" id="panel-tl">
+      <div class="cc"><div class="cc-h"><div class="cc-lbl">🕐 Timeline</div><div class="cc-acts"><button class="icn" onclick="cp('tlEl')" title="Copy">⎘</button></div></div><div class="cc-b"><div id="tlEl"></div></div></div>
+    </div>
+    <div class="panel" id="panel-tx">
+      <div class="cc">
+        <div class="cc-h">
+          <div class="cc-lbl">📄 Transcript</div>
+          <div class="cc-acts">
+            <span class="tlang" id="txLang">🇬🇧 Translated</span>
+            <button class="abtn" id="trBtn" onclick="doTranslate()">🌐 Translate</button>
+            <button class="abtn dark" onclick="openStudy()">📚 Study Notes</button>
+            <button class="icn" onclick="cp('txEl')" title="Copy">⎘</button>
+          </div>
+        </div>
+        <div class="cc-b"><div class="txb" id="txEl"></div></div>
+      </div>
+    </div>
+    <div class="panel" id="panel-sum">
+      <div class="cc"><div class="cc-h"><div class="cc-lbl">⚡ Summary</div><div class="cc-acts"><button class="icn" onclick="cp('sumEl')" title="Copy">⎘</button></div></div><div class="cc-b"><div class="sumb" id="sumEl"></div></div></div>
+    </div>
+    <div class="panel" id="panel-quiz">
+      <div id="scoreBox" style="display:none" class="sbox">
+        <div><div class="slbl">Score</div><div class="sval" id="scoreVal">—</div></div>
+        <button class="bac" onclick="retake()">↺ Retake</button>
+      </div>
+      <div id="quizEl"></div>
+    </div>
+
+    <div class="brow">
+      <button class="bac" onclick="dlPDF()">⬇ Download PDF</button>
+      <button class="bac" onclick="saveNotes()">💾 Save Notes</button>
+      <button class="bac" onclick="shareIt()">↗ Share</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="studyOv" onclick="closeStudyOv(event)">
+    <div class="modal">
+      <div class="mhead">
+        <div><div class="mtitle">📚 Study Notes</div><div class="msub" id="studySub">—</div></div>
+        <button class="mclose" onclick="closeStudy()">✕</button>
+      </div>
+      <div class="mbody" id="studyBody"><div class="sn-loading"><div class="sn-spin"></div>Generating...</div></div>
+      <div class="mfoot">
+        <button class="bac" onclick="cpStudy()">⎘ Copy</button>
+        <button class="bac" onclick="dlStudy()">⬇ PDF</button>
+        <button class="bac" style="margin-left:auto" onclick="closeStudy()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hist" id="histSec" style="display:none">
+    <div class="sec-lbl">Recent Videos</div>
+    <div class="hlist" id="histList"></div>
+  </div>
+
+  <footer>
+    <div class="fi">
+      <span class="ft">Made with</span><span class="fh">♥</span>
+      <span class="ft">by</span><span class="fn">Munish Mishra</span>
+    </div>
+  </footer>
+</main>
+
+<script>
+'use strict';
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║              PASTE YOUR API KEYS HERE                   ║
+// ╠══════════════════════════════════════════════════════════╣
+// ║  1. GROQ KEY  (Main AI — analysis, notes, quiz, study)  ║
+// ║     Free at: https://console.groq.com                   ║
+// ║     Starts with: gsk_                                   ║
+var GROQ_KEY = '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';
+// ╠══════════════════════════════════════════════════════════╣
+// ║  2. SUPADATA KEY  (Real transcript fetching)            ║
+// ║     Free at: https://supadata.ai  (100 req/month free)  ║
+// ║     Starts with: sup_  OR  ey...                        ║
+var SUPA_KEY = 'sd_a833d6aae4ff4316865a4a482837ec3b';
+// ╠══════════════════════════════════════════════════════════╣
+// ║  3. OPENROUTER KEY  (Backup AI if Groq is busy)         ║
+// ║     Free at: https://openrouter.ai                      ║
+// ║     Starts with: sk-or-v1-                              ║
+// ║     (OPTIONAL — leave as-is if you only want Groq)      ║
+var OR_KEY = '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';
+// ╚══════════════════════════════════════════════════════════╝
+
+// ── AI MODELS ─────────────────────────────────────────
+var GROQ_MODELS = ['llama-3.3-70b-versatile', 'openai/gpt-oss-20b', 'llama-3.1-8b-instant'];
+var OR_MODELS   = ['openrouter/free', 'meta-llama/llama-3.3-70b-instruct:free', 'google/gemma-3-12b-it:free'];
+
+// ── STATE ─────────────────────────────────────────────
+var G = { cur: null, origTx: '', translatedTx: '', translated: false, studyCache: null, qA: 0, qC: 0, qT: 0 };
+
+// ── DARK MODE ─────────────────────────────────────────
+function toggleDark() {
+  var on = document.documentElement.hasAttribute('dark');
+  document.documentElement.toggleAttribute('dark', !on);
+  localStorage.setItem('dk', on ? '' : '1');
+}
+if (localStorage.getItem('dk') === '1') document.documentElement.setAttribute('dark', '');
+
+// ── LOADING ───────────────────────────────────────────
+var STEPS = [
+  ['Fetching transcript',   'Reading YouTube captions...',   12],
+  ['Got transcript!',       'Calling Groq AI...',            32],
+  ['Groq is analyzing',     'Llama 3.3 processing...',       56],
+  ['Building your notes',   'Almost done...',                80],
+  ['Finishing up',          'Preparing results...',          94],
+];
+var sIdx = 0, sTimer;
+function startLoad() {
+  sIdx = 0;
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('errbox').style.display  = 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('goBtn').disabled = true;
+  tick();
+  sTimer = setInterval(function() { sIdx = Math.min(sIdx + 1, STEPS.length - 1); tick(); }, 2200);
+}
+function tick() {
+  var s = STEPS[sIdx];
+  document.getElementById('loadT').textContent    = s[0];
+  document.getElementById('loadS').textContent    = s[1];
+  document.getElementById('loadFill').style.width = s[2] + '%';
+}
+function stopLoad() {
+  clearInterval(sTimer);
+  document.getElementById('loadFill').style.width = '100%';
+  setTimeout(function() { document.getElementById('loading').style.display = 'none'; }, 300);
+  document.getElementById('goBtn').disabled = false;
+}
+function showErr(h, b) {
+  stopLoad();
+  document.getElementById('errH').textContent = h;
+  document.getElementById('errB').textContent = b;
+  document.getElementById('errbox').style.display = 'block';
+}
+
+// ── EXTRACT VIDEO ID ──────────────────────────────────
+function getVid(url) {
+  var ps = [/[?&]v=([A-Za-z0-9_-]{11})/, /youtu\.be\/([A-Za-z0-9_-]{11})/, /\/shorts\/([A-Za-z0-9_-]{11})/, /\/embed\/([A-Za-z0-9_-]{11})/, /^([A-Za-z0-9_-]{11})$/];
+  for (var i = 0; i < ps.length; i++) { var m = String(url).match(ps[i]); if (m) return m[1]; }
+  return null;
+}
+
+// ── FETCH REAL TRANSCRIPT (Supadata) ─────────────────
+async function fetchTranscript(vid) {
+  try {
+    var headers = {};
+    if (SUPA_KEY && SUPA_KEY !== 'YOUR_SUPADATA_KEY_HERE') headers['x-api-key'] = SUPA_KEY;
+    var r = await fetch('https://api.supadata.ai/v1/youtube/transcript?videoId=' + vid + '&text=true', { headers: headers });
+    if (!r.ok) return { ok: false, text: '' };
+    var d = await r.json();
+    var raw = (d && (d.content || d.transcript || d.text)) ? String(d.content || d.transcript || d.text) : '';
+    if (!raw) return { ok: false, text: '' };
+    var clean = raw.replace(/\[.*?\]/g, '').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim();
+    return { ok: true, text: clean.slice(0, 12000) };
+  } catch(e) { return { ok: false, text: '' }; }
+}
+
+// ── CALL GROQ ─────────────────────────────────────────
+async function callGroq(sys, user, mIdx) {
+  mIdx = mIdx || 0;
+  if (!GROQ_KEY || GROQ_KEY === 'YOUR_GROQ_KEY_HERE') throw new Error('Groq key not set. Open this file in Notepad and paste your key from console.groq.com');
+  if (mIdx >= GROQ_MODELS.length) throw new Error('All Groq models busy. Try again in 10 seconds.');
+  var r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + GROQ_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: GROQ_MODELS[mIdx], messages: [{ role: 'system', content: sys }, { role: 'user', content: user }], temperature: 0.3, max_tokens: 3000 })
+  });
+  if (r.status === 429 || r.status === 503) return callGroq(sys, user, mIdx + 1);
+  if (!r.ok) {
+    var e = await r.json().catch(function() { return {}; });
+    var msg = (e && e.error && e.error.message) || ('Groq error ' + r.status);
+    // If Groq models exhausted, try OpenRouter as backup
+    if (mIdx >= GROQ_MODELS.length - 1 && OR_KEY && OR_KEY !== 'YOUR_OPENROUTER_KEY_HERE') {
+      return callOR(sys, user, 0);
+    }
+    throw new Error(msg);
+  }
+  var d = await r.json();
+  return stripToJSON((d && d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) ? d.choices[0].message.content : '');
+}
+
+// ── CALL OPENROUTER (backup) ──────────────────────────
+async function callOR(sys, user, mIdx) {
+  mIdx = mIdx || 0;
+  if (!OR_KEY || OR_KEY === 'YOUR_OPENROUTER_KEY_HERE') throw new Error('No backup AI available. Please set OpenRouter key.');
+  if (mIdx >= OR_MODELS.length) throw new Error('All AI models busy. Please wait and retry.');
+  var r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + OR_KEY, 'Content-Type': 'application/json', 'HTTP-Referer': 'https://youtube-textlizer.app', 'X-Title': 'YouTube Textlizer' },
+    body: JSON.stringify({ model: OR_MODELS[mIdx], messages: [{ role: 'system', content: sys }, { role: 'user', content: user }], temperature: 0.3, max_tokens: 3000 })
+  });
+  if (r.status === 429 || r.status === 503 || r.status === 502) return callOR(sys, user, mIdx + 1);
+  if (!r.ok) {
+    var e = await r.json().catch(function() { return {}; });
+    var msg = (e && e.error && e.error.message) || '';
+    if (mIdx < OR_MODELS.length - 1 && (r.status === 400 || r.status === 404 || msg.toLowerCase().indexOf('no endpoints') !== -1)) return callOR(sys, user, mIdx + 1);
+    throw new Error(msg || 'OpenRouter error ' + r.status);
+  }
+  var d = await r.json();
+  return stripToJSON((d && d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) ? d.choices[0].message.content : '');
+}
+
+// Groq is primary; OR is backup
+function callAI(sys, user) { return callGroq(sys, user, 0); }
+
+function stripToJSON(txt) {
+  var s = txt.length;
+  for (var i = 0; i < txt.length; i++) { if (txt[i] === '{' || txt[i] === '[') { s = i; break; } }
+  if (s > 0) txt = txt.substring(s);
+  var eo = txt.lastIndexOf('}'), ea = txt.lastIndexOf(']'), e = Math.max(eo, ea);
+  if (e > 0 && e < txt.length - 1) txt = txt.substring(0, e + 1);
+  return txt.trim();
+}
+
+function parseJ(raw) {
+  if (!raw) throw new Error('Empty AI response. Please try again.');
+  try { return JSON.parse(raw); } catch(_) {}
+  var s = raw.length;
+  for (var i = 0; i < raw.length; i++) { if (raw[i] === '{' || raw[i] === '[') { s = i; break; } }
+  var sl = s > 0 ? raw.substring(s) : raw;
+  var eo = sl.lastIndexOf('}'), ea = sl.lastIndexOf(']'), e = Math.max(eo, ea);
+  if (e > 0) sl = sl.substring(0, e + 1);
+  try { return JSON.parse(sl); } catch(_) {}
+  // Remove trailing commas
+  try {
+    var fixed = '';
+    for (var j = 0; j < sl.length; j++) {
+      if (sl[j] === ',' && j + 1 < sl.length) {
+        var next = sl.substring(j + 1).trimStart()[0];
+        if (next === '}' || next === ']') continue;
+      }
+      fixed += sl[j];
+    }
+    return JSON.parse(fixed);
+  } catch(_) {}
+  throw new Error('Could not parse AI response. Please try again.');
+}
+
+// ── PROMPTS ───────────────────────────────────────────
+var SYS_JSON = 'You are an expert analyst. Return ONLY valid raw JSON. No markdown. No text outside the JSON.';
+
+function mainPrompt(title, chan, txCtx) {
+  var t = title.split('"').join("'");
+  var c = chan.split('"').join("'");
+  return 'Analyze this YouTube video.\nTitle: "' + t + '"\nChannel: "' + c + '"\n' + txCtx + '\n\n'
+    + 'Return this exact JSON:\n'
+    + '{"title":"' + t + '","channel":"' + c + '","duration":"~X min",'
+    + '"summary":"2-3 sentence summary of actual content",'
+    + '"keyPoints":["point 1","point 2","point 3","point 4","point 5","point 6"],'
+    + '"notes":"<h3>Section 1</h3><p>What was covered here in detail.</p><h3>Section 2</h3><p>More detail.</p><h3>Key Takeaways</h3><p>What viewer learns.</p>",'
+    + '"timeline":[{"timestamp":"0:00","content":"opening"},{"timestamp":"2:00","content":"main topic"},{"timestamp":"5:00","content":"core concept"},{"timestamp":"8:00","content":"examples"},{"timestamp":"11:00","content":"conclusion"}]}';
+}
+
+function quizPrompt(title, txCtx) {
+  var t = title.split('"').join("'");
+  return 'Create 4 quiz questions for: "' + t + '"\n' + txCtx + '\n\n'
+    + 'Return ONLY JSON array:\n'
+    + '[{"question":"q1?","options":["correct","wrong","wrong","wrong"],"correct":0,"explanation":"why"},'
+    + '{"question":"q2?","options":["wrong","correct","wrong","wrong"],"correct":1,"explanation":"why"},'
+    + '{"question":"q3?","options":["wrong","wrong","correct","wrong"],"correct":2,"explanation":"why"},'
+    + '{"question":"q4?","options":["correct","wrong","wrong","wrong"],"correct":0,"explanation":"why"}]';
+}
+
+function studyPrompt(title, chan, tx) {
+  var t = title.split('"').join("'");
+  return 'You are an expert teacher. Create comprehensive, deeply detailed study notes that TEACH the content — not just list it.\n'
+    + 'Video: "' + t + '"\n'
+    + (tx ? 'Transcript:\n---\n' + tx.slice(0, 7000) + '\n---\n' : '')
+    + '\nSTRICT RULES:\n'
+    + '- TEACH each concept fully — every point needs 3-5 sentences of explanation\n'
+    + '- Explain WHAT it is, HOW it works, WHY it matters, give an EXAMPLE if possible\n'
+    + '- Do NOT just write a label or title — write full educational paragraphs\n'
+    + '- Each section explanation must be 3-4 sentences minimum\n'
+    + '- Key terms must have complete, contextual definitions with examples\n'
+    + '- Remove all filler, jokes, sponsors, personal stories, intros/outros\n'
+    + '- Write like a textbook chapter — detailed, clear, educational\n'
+    + '\nReturn this exact JSON:\n'
+    + '{"subject":"main topic of this video",'
+    + '"overview":"3-4 sentence academic overview explaining what this video teaches and why it matters",'
+    + '"sections":['
+    +   '{"heading":"Section name from video",'
+    +   '"explanation":"2-3 sentence paragraph explaining what this section covers and the core concept taught here",'
+    +   '"points":['
+    +     '{"point":"Concept name","detail":"FULL 3-5 sentence teaching explanation: what this concept is, how it works, why it matters, and a real example. Never just state the name — always teach it fully."},'
+    +     '{"point":"Concept name","detail":"Full 3-5 sentence teaching explanation with a real example showing how to apply this concept"},'
+    +     '{"point":"Concept name","detail":"Full 3-5 sentence teaching explanation with example"}'
+    +   '],'
+    +   '"definition":{"term":"Most important term in this section","meaning":"Complete definition with context and example if possible"},'
+    +   '"note":"A key insight, warning, or tip a student should remember about this section"}'
+    + '],'
+    + '"keyTerms":[{"term":"Term","definition":"Complete definition with context — not just 2 words"}],'
+    + '"mainPoints":['
+    +   '{"point":"Most important concept","explanation":"2-3 sentence explanation of why this is the most important takeaway"},'
+    +   '{"point":"Second concept","explanation":"Full explanation"},'
+    +   '{"point":"Third concept","explanation":"Full explanation"},'
+    +   '{"point":"Fourth concept","explanation":"Full explanation"},'
+    +   '{"point":"Fifth concept","explanation":"Full explanation"}'
+    + '],'
+    + '"examTips":['
+    +   '"Detailed tip 1 — explain what to remember and why",'
+    +   '"Detailed tip 2 — what common mistakes to avoid",'
+    +   '"Detailed tip 3 — key formula, rule, or principle to know"'
+    + ']}';
+}
+
+// ── MAIN ANALYZE ──────────────────────────────────────
+async function analyze() {
+  var url = document.getElementById('urlInput').value.trim();
+  if (!url) { showErr('No URL', 'Please paste a YouTube link above.'); return; }
+  var vid = getVid(url);
+  if (!vid) { showErr('Invalid URL', 'Could not find a YouTube video ID. Use youtube.com/watch?v=... or youtu.be/...'); return; }
+  startLoad();
+  try {
+    var metaP = fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=' + vid + '&format=json')
+      .then(function(r) { return r.ok ? r.json() : {}; }).catch(function() { return {}; });
+    var txP = fetchTranscript(vid);
+    var both = await Promise.all([metaP, txP]);
+    var meta = both[0], tx = both[1];
+    var title = (meta && meta.title) || 'YouTube Video';
+    var chan  = (meta && meta.author_name) || 'Unknown';
+    sIdx = 1; tick();
+
+    var txCtx = tx.ok
+      ? ('Use ONLY this real transcript:\n---\n' + tx.text + '\n---')
+      : 'No transcript available. Use your knowledge of this video.';
+
+    var aiRes = await Promise.all([
+      callAI(SYS_JSON, mainPrompt(title, chan, txCtx)),
+      callAI(SYS_JSON, quizPrompt(title, txCtx)).catch(function() { return '[]'; }),
+    ]);
+    sIdx = 3; tick();
+
+    var main = parseJ(aiRes[0]);
+    var quiz = [];
+    try { var q = parseJ(aiRes[1]); quiz = Array.isArray(q) ? q : []; } catch(_) {}
+
+    G.cur = {
+      videoId:   vid,
+      thumbnail: 'https://img.youtube.com/vi/' + vid + '/mqdefault.jpg',
+      title:     main.title     || title,
+      channel:   main.channel   || chan,
+      duration:  main.duration  || '—',
+      summary:   main.summary   || '',
+      keyPoints: main.keyPoints || [],
+      notes:     main.notes     || '',
+      timeline:  main.timeline  || [],
+      transcript: tx.ok ? tx.text : '',
+      quiz: quiz,
+      hasReal: tx.ok,
+    };
+    G.origTx = G.cur.transcript;
+    G.translatedTx = '';
+    G.translated = false;
+    G.studyCache = null;
+    stopLoad();
+    render(G.cur);
+    saveHist(G.cur, url);
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch(e) {
+    showErr('Analysis Failed', e.message);
+  }
+}
+
+// ── RENDER ────────────────────────────────────────────
+function render(d) {
+  document.getElementById('vThumb').src           = d.thumbnail;
+  document.getElementById('vTitle').textContent   = d.title;
+  document.getElementById('vChan').textContent    = d.channel;
+  document.getElementById('vDur').textContent     = d.duration;
+  document.getElementById('vReal').style.display  = d.hasReal ? 'inline' : 'none';
+  document.getElementById('vEst').style.display   = d.hasReal ? 'none' : 'inline';
+  document.getElementById('notesEl').innerHTML    = d.notes || '<p style="color:var(--tx3)">No notes.</p>';
+
+  var kp = document.getElementById('kpEl');
+  kp.innerHTML = '';
+  (d.keyPoints || []).forEach(function(k) {
+    var li = document.createElement('li');
+    li.innerHTML = '<div class="kpdot"></div><span>' + k + '</span>';
+    kp.appendChild(li);
+  });
+
+  var tl = document.getElementById('tlEl');
+  tl.innerHTML = '';
+  (d.timeline || []).forEach(function(t) {
+    var div = document.createElement('div');
+    div.className = 'tli';
+    div.innerHTML = '<div class="tlts">' + t.timestamp + '</div><div class="tltx">' + t.content + '</div>';
+    tl.appendChild(div);
+  });
+
+  document.getElementById('txEl').textContent  = d.transcript || '(No transcript available for this video)';
+  document.getElementById('sumEl').textContent = d.summary    || '—';
+
+  var tb = document.getElementById('trBtn');
+  tb.textContent = '🌐 Translate to English';
+  tb.classList.remove('on');
+  tb.disabled = false;
+  document.getElementById('txLang').classList.remove('on');
+
+  buildQuiz(d.quiz || []);
+  document.getElementById('results').style.display = 'block';
+  showTab('notes', document.querySelector('.tab'));
+}
+
+// ── TABS ──────────────────────────────────────────────
+function showTab(name, btn) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
+  document.querySelectorAll('.tab').forEach(function(b) { b.classList.remove('on'); });
+  document.getElementById('panel-' + name).classList.add('on');
+  if (btn) btn.classList.add('on');
+}
+
+async function doSum(btn) {
+  showTab('sum', btn);
+  if (!G.cur) return;
+  var el = document.getElementById('sumEl');
+  if (G.cur.summary) { el.textContent = G.cur.summary; return; }
+  el.textContent = '⚡ Generating with Groq...';
+  try {
+    var r = await callAI(
+      'Write only the summary text. No labels. No markdown.',
+      'Summarize in 3 sentences: "' + G.cur.title + '"\n' + (G.cur.transcript ? G.cur.transcript.slice(0, 4000) : '')
+    );
+    G.cur.summary = r;
+    el.textContent = r;
+  } catch(e) { el.textContent = 'Failed: ' + e.message; }
+}
+
+async function doQuiz(btn) {
+  showTab('quiz', btn);
+  if (!G.cur) return;
+  if (G.cur.quiz && G.cur.quiz.length) return;
+  document.getElementById('quizEl').innerHTML = '<p style="color:var(--tx3);text-align:center;padding:32px;font-size:.875rem">⚡ Generating quiz...</p>';
+  try {
+    var txCtx = G.cur.transcript ? 'Transcript:\n' + G.cur.transcript.slice(0, 5000) : '';
+    var r = await callAI(SYS_JSON, quizPrompt(G.cur.title, txCtx));
+    var q = parseJ(r);
+    G.cur.quiz = Array.isArray(q) ? q : [];
+    buildQuiz(G.cur.quiz);
+  } catch(e) {
+    document.getElementById('quizEl').innerHTML = '<p style="color:var(--red);padding:24px;font-size:.875rem">Failed: ' + e.message + '</p>';
+  }
+}
+
+// ── TRANSLATE ─────────────────────────────────────────
+async function doTranslate() {
+  if (!G.cur || !G.cur.transcript) { toast('No transcript to translate.'); return; }
+  var btn  = document.getElementById('trBtn');
+  var el   = document.getElementById('txEl');
+  var lang = document.getElementById('txLang');
+
+  // Toggle back to original
+  if (G.translated) {
+    G.translated = false;
+    G.studyCache = null; // reset so study notes regenerate in original language
+    el.textContent = G.origTx;
+    btn.textContent = '🌐 Translate to English';
+    btn.classList.remove('on');
+    lang.classList.remove('on');
+    return;
+  }
+
+  // If already translated before, just show cached
+  if (G.translatedTx) {
+    G.translated = true;
+    el.textContent = G.translatedTx;
+    btn.textContent = '↩ Show Original';
+    btn.classList.add('on');
+    lang.classList.add('on');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Translating...';
+  try {
+    var tx = G.cur.transcript;
+    var translated = '';
+
+    // Split into 4000-char chunks for speed & reliability
+    var chunkSize = 4000;
+    var chunks = [];
+    for (var i = 0; i < tx.length; i += chunkSize) {
+      chunks.push(tx.slice(i, i + chunkSize));
+    }
+
+    // Translate all chunks in parallel for max speed
+    var promises = chunks.map(function(chunk) {
+      return callAI(
+        'You are a professional translator. Translate the given text to English accurately and fluently. Return ONLY the translated text. No labels, no explanations.',
+        'Translate this to English:\n\n' + chunk
+      );
+    });
+
+    var results = await Promise.all(promises);
+    translated = results.join(' ');
+
+    G.translatedTx = translated;
+    G.translated = true;
+    G.studyCache = null; // reset so study notes regenerate in English
+    el.textContent = translated;
+    btn.disabled = false;
+    btn.textContent = '↩ Show Original';
+    btn.classList.add('on');
+    lang.classList.add('on');
+    toast('Translated to English ✓');
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '🌐 Translate to English';
+    toast('Translation failed: ' + e.message);
+  }
+}
+
+// ── STUDY NOTES ───────────────────────────────────────
+async function openStudy() {
+  if (!G.cur) return;
+  document.getElementById('studySub').textContent = G.cur.title;
+  document.getElementById('studyOv').classList.add('on');
+  document.body.style.overflow = 'hidden';
+  if (G.studyCache) { document.getElementById('studyBody').innerHTML = G.studyCache; return; }
+  document.getElementById('studyBody').innerHTML = '<div class="sn-loading"><div class="sn-spin"></div>⚡ Groq generating study notes...</div>';
+  try {
+    // Use translated transcript if available — gives English study notes
+    var txForStudy = (G.translated && G.translatedTx) ? G.translatedTx : G.cur.transcript;
+    var r = await callAI(SYS_JSON, studyPrompt(G.cur.title, G.cur.channel, txForStudy));
+    var d = parseJ(r);
+    G.studyCache = buildStudyHTML(d);
+    document.getElementById('studyBody').innerHTML = G.studyCache;
+    toast('Study notes ready ✓');
+  } catch(e) {
+    document.getElementById('studyBody').innerHTML = '<p style="color:var(--red);padding:24px;font-size:.875rem">Failed: ' + e.message + '</p>';
+  }
+}
+
+function buildStudyHTML(d) {
+  var h = '<div class="sn">';
+  h += '<div class="sn-h1">' + (d.subject || 'Study Notes') + '</div>';
+  h += '<div class="sn-meta">📖 ' + (G.cur ? G.cur.channel : '') + ' · ' + (G.cur ? G.cur.title : '') + '</div>';
+
+  // Overview — full paragraph
+  if (d.overview) {
+    h += '<div class="sn-sec"><h2>📌 Overview</h2><p class="sn-para">' + d.overview + '</p></div>';
+  }
+
+  // Main Points — each with full explanation
+  if (d.mainPoints && d.mainPoints.length) {
+    h += '<div class="sn-sec"><h2>⭐ Most Important Points</h2>';
+    d.mainPoints.forEach(function(p) {
+      if (typeof p === 'object' && p.point) {
+        h += '<div class="sn-point"><div class="sn-point-title">▸ ' + p.point + '</div>';
+        if (p.explanation) h += '<div class="sn-point-detail">' + p.explanation + '</div>';
+        h += '</div>';
+      } else {
+        h += '<div class="sn-point"><div class="sn-point-title">▸ ' + p + '</div></div>';
+      }
+    });
+    h += '</div>';
+  }
+
+  // Sections — each with explanation + detailed points
+  if (d.sections && d.sections.length) {
+    d.sections.forEach(function(sec) {
+      h += '<div class="sn-sec"><h2>📂 ' + sec.heading + '</h2>';
+      // Section overview paragraph
+      if (sec.explanation) h += '<p class="sn-para">' + sec.explanation + '</p>';
+      // Points with full detail
+      if (sec.points && sec.points.length) {
+        sec.points.forEach(function(p) {
+          if (typeof p === 'object' && p.point) {
+            h += '<div class="sn-point"><div class="sn-point-title">▸ ' + p.point + '</div>';
+            if (p.detail) h += '<div class="sn-point-detail">' + p.detail + '</div>';
+            h += '</div>';
+          } else {
+            h += '<div class="sn-point"><div class="sn-point-title">▸ ' + p + '</div></div>';
+          }
+        });
+      }
+      // Key definition
+      if (sec.definition && sec.definition.term) {
+        h += '<div class="sndef"><strong>' + sec.definition.term + '</strong>' + sec.definition.meaning + '</div>';
+      }
+      // Important note
+      if (sec.note) h += '<div class="snnote">💡 ' + sec.note + '</div>';
+      h += '</div>';
+    });
+  }
+
+  // Key Terms — full definitions
+  if (d.keyTerms && d.keyTerms.length) {
+    h += '<div class="sn-sec"><h2>📖 Key Terms & Definitions</h2>';
+    d.keyTerms.forEach(function(t) {
+      h += '<div class="sndef"><strong>' + t.term + '</strong>' + t.definition + '</div>';
+    });
+    h += '</div>';
+  }
+
+  // Exam Tips — detailed
+  if (d.examTips && d.examTips.length) {
+    h += '<div class="sn-sec"><h2>🎯 Remember This</h2>';
+    d.examTips.forEach(function(t) {
+      h += '<div class="sn-point"><div class="sn-point-detail" style="color:var(--tx)">▸ ' + t + '</div></div>';
+    });
+    h += '</div>';
+  }
+
+  return h + '</div>';
+}
+
+function closeStudyOv(e) { if (e.target === document.getElementById('studyOv')) closeStudy(); }
+function closeStudy() { document.getElementById('studyOv').classList.remove('on'); document.body.style.overflow = ''; }
+function cpStudy() { navigator.clipboard.writeText(document.getElementById('studyBody').innerText).then(function() { toast('Copied ✓'); }); }
+function dlStudy() {
+  if (!G.studyCache || !G.cur) return;
+  var w = window.open('', '_blank');
+  w.document.write('<!DOCTYPE html><html><head><title>Study Notes - ' + G.cur.title + '</title>'
+    + '<style>body{font-family:Georgia,serif;max-width:720px;margin:40px auto;padding:0 28px;line-height:1.8;color:#111}'
+    + 'h1{font-size:1.5rem;margin-bottom:6px}h2{font-size:.85rem;text-transform:uppercase;letter-spacing:.07em;color:#888;border-bottom:1.5px solid #eee;padding-bottom:5px;margin:30px 0 14px}'
+    + 'p{color:#444;margin-bottom:12px;font-size:.92rem}'
+    + '.sn-point{margin-bottom:16px;padding:14px 16px;background:#f8f8f6;border-left:3px solid #ccc;border-radius:4px}'
+    + '.sn-point-title{font-size:.92rem;font-weight:700;color:#111;margin-bottom:7px}'
+    + '.sn-point-detail{font-size:.88rem;color:#444;line-height:1.75}'
+    + '.sn-para{font-size:.92rem;color:#444;margin-bottom:14px;line-height:1.78}'
+    + '.sndef{background:#f4f4f0;border-left:3px solid #333;padding:8px 14px;margin:8px 0;font-size:.86rem}'
+    + '.sndef strong{display:block;font-size:.75rem;text-transform:uppercase;color:#888;margin-bottom:3px}'
+    + '.snnote{background:#f0fdf5;border:1px solid #c6f0d8;border-radius:4px;padding:9px 14px;font-size:.85rem;margin:8px 0;color:#1a5c35}'
+    + '.meta{color:#999;font-size:.8rem;margin-bottom:28px}'
+    + '</style></head><body><h1>Study Notes</h1>'
+    + '<div class="meta">' + G.cur.title + ' · ' + (G.cur.channel||'') + '</div>'
+    + G.studyCache
+    + '<scr' + 'ipt>window.print();</scr' + 'ipt></body></html>');
+  w.document.close();
+}
+
+// ── QUIZ ──────────────────────────────────────────────
+function buildQuiz(qs) {
+  G.qA = 0; G.qC = 0; G.qT = qs.length;
+  document.getElementById('scoreBox').style.display = 'none';
+  var el = document.getElementById('quizEl');
+  el.innerHTML = '';
+  if (!qs.length) { el.innerHTML = '<p style="color:var(--tx3);text-align:center;padding:32px;font-size:.875rem">No quiz available.</p>'; return; }
+  qs.forEach(function(q, qi) {
+    var card = document.createElement('div');
+    card.className = 'qcard'; card.id = 'qc' + qi;
+    var opts = '';
+    q.options.forEach(function(o, oi) {
+      opts += '<button class="opt" onclick="answer(' + qi + ',' + oi + ',' + q.correct + ',this)">'
+        + '<span class="olbl">' + 'ABCD'[oi] + '</span>' + o + '</button>';
+    });
+    card.innerHTML = '<div class="qq"><span class="qn">Q' + (qi+1) + '</span>' + q.question + '</div>'
+      + '<div class="opts">' + opts + '</div>'
+      + '<div class="qexp" id="qe' + qi + '">' + (q.explanation||'') + '</div>';
+    el.appendChild(card);
+  });
+}
+function answer(qi, chosen, correct, btn) {
+  var card = document.getElementById('qc' + qi);
+  card.querySelectorAll('.opt').forEach(function(o) { o.disabled = true; });
+  card.querySelectorAll('.opt')[correct].classList.add('correct');
+  if (chosen !== correct) btn.classList.add('wrong'); else G.qC++;
+  document.getElementById('qe' + qi).classList.add('show');
+  G.qA++;
+  if (G.qA === G.qT) {
+    document.getElementById('scoreBox').style.display = 'flex';
+    document.getElementById('scoreVal').textContent = G.qC + ' / ' + G.qT;
+  }
+}
+function retake() { if (G.cur && G.cur.quiz) buildQuiz(G.cur.quiz); }
+
+// ── COPY ──────────────────────────────────────────────
+function cp(id) {
+  var el = document.getElementById(id);
+  navigator.clipboard.writeText(el.innerText || el.textContent).then(function() {
+    toast('Copied ✓');
+    var icn = el.closest && el.closest('.cc') ? el.closest('.cc').querySelector('.icn') : null;
+    if (icn) { icn.classList.add('ok'); setTimeout(function() { icn.classList.remove('ok'); }, 1800); }
+  });
+}
+
+// ── PDF ───────────────────────────────────────────────
+function dlPDF() {
+  if (!G.cur) return;
+  var d = G.cur;
+  var kpH = (d.keyPoints||[]).map(function(k) { return '<li>' + k + '</li>'; }).join('');
+  var tlH = (d.timeline||[]).map(function(t) { return '<p><b style="color:#bbb;margin-right:8px">' + t.timestamp + '</b>' + t.content + '</p>'; }).join('');
+  var w = window.open('', '_blank');
+  w.document.write('<!DOCTYPE html><html><head><title>' + d.title + '</title>'
+    + '<style>body{font-family:Georgia,serif;max-width:720px;margin:40px auto;padding:0 24px;line-height:1.75;color:#111}'
+    + 'h1{font-size:1.7rem;margin-bottom:6px}h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.07em;color:#999;border-bottom:1px solid #eee;padding-bottom:4px;margin:26px 0 10px}'
+    + 'ul{padding-left:18px}li{margin-bottom:6px}p{color:#444;margin-bottom:10px}h3{font-size:1rem;color:#222;margin:14px 0 5px}'
+    + '.meta{color:#888;font-size:.82rem;margin-bottom:28px}'
+    + '</style></head><body>'
+    + '<h1>' + d.title + '</h1><div class="meta">' + (d.channel||'') + ' · ' + (d.duration||'') + '</div>'
+    + '<h2>Summary</h2><p>' + (d.summary||'') + '</p>'
+    + '<h2>Key Points</h2><ul>' + kpH + '</ul>'
+    + '<h2>Notes</h2>' + (d.notes||'')
+    + '<h2>Timeline</h2>' + tlH
+    + '<h2>Transcript</h2><p style="white-space:pre-wrap;font-size:.84rem;color:#555">' + (G.translated && G.translatedTx ? G.translatedTx : (d.transcript||'')) + '</p>'
+    + (G.translated && G.translatedTx ? '<p style="font-size:.72rem;color:#aaa;margin-top:4px">(Translated to English)</p>' : '')
+    + '<scr' + 'ipt>window.print();</scr' + 'ipt></body></html>');
+  w.document.close();
+}
+
+// ── SAVE / SHARE ──────────────────────────────────────
+function saveNotes() {
+  if (!G.cur) return;
+  var s = JSON.parse(localStorage.getItem('tl_s')||'[]');
+  var found = false;
+  s.forEach(function(x, i) { if (x.videoId === G.cur.videoId) { s[i] = G.cur; found = true; } });
+  if (!found) s.unshift(G.cur);
+  localStorage.setItem('tl_s', JSON.stringify(s.slice(0, 20)));
+  toast('Notes saved ✓');
+}
+function shareIt() {
+  if (!G.cur) return;
+  var t = '📺 ' + G.cur.title + '\n\n' + (G.cur.summary||'') + '\n\nAnalyzed with YouTube Textlizer';
+  if (navigator.share) navigator.share({ title: G.cur.title, text: t });
+  else { navigator.clipboard.writeText(t); toast('Share text copied ✓'); }
+}
+
+// ── HISTORY ───────────────────────────────────────────
+function saveHist(data, url) {
+  var h = JSON.parse(localStorage.getItem('tl_h')||'[]');
+  h.unshift({ videoId: data.videoId, title: data.title, channel: data.channel, thumbnail: data.thumbnail, url: url, date: new Date().toLocaleDateString(), data: data });
+  localStorage.setItem('tl_h', JSON.stringify(h.slice(0, 15)));
+  renderHist();
+}
+function renderHist() {
+  var h = JSON.parse(localStorage.getItem('tl_h')||'[]');
+  var sec = document.getElementById('histSec');
+  if (!h.length) { sec.style.display = 'none'; return; }
+  sec.style.display = 'block';
+  var html = '';
+  h.forEach(function(v, i) {
+    html += '<div class="hi" onclick="loadH(' + i + ')">'
+      + '<img class="hi-thumb" src="' + v.thumbnail + '" alt=""/>'
+      + '<span class="hi-title">' + v.title + '</span>'
+      + '<span class="hi-date">' + v.date + '</span>'
+      + '<button class="hi-del" onclick="delH(event,' + i + ')">✕</button></div>';
+  });
+  document.getElementById('histList').innerHTML = html;
+}
+function loadH(i) {
+  var h = JSON.parse(localStorage.getItem('tl_h')||'[]');
+  if (!h[i] || !h[i].data) return;
+  G.cur = h[i].data; G.origTx = G.cur.transcript || ''; G.translatedTx = ''; G.translated = false; G.studyCache = null;
+  document.getElementById('urlInput').value = h[i].url;
+  render(G.cur);
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+function delH(e, i) {
+  e.stopPropagation();
+  var h = JSON.parse(localStorage.getItem('tl_h')||'[]');
+  h.splice(i, 1); localStorage.setItem('tl_h', JSON.stringify(h)); renderHist();
+}
+
+// ── TOAST ──────────────────────────────────────────────
+var tT;
+function toast(msg) {
+  var old = document.querySelector('.toast'); if (old) old.remove();
+  clearTimeout(tT);
+  var el = document.createElement('div'); el.className = 'toast'; el.textContent = msg;
+  document.body.appendChild(el);
+  tT = setTimeout(function() { el.classList.add('out'); setTimeout(function() { el.remove(); }, 300); }, 2600);
+}
+
+renderHist();
+</script>
+</body>
+</html>
